@@ -2,8 +2,13 @@ name: Release APK
 
 on:
   push:
-    tags:
-      - 'v*'     # например v0.1.0
+    tags: ['v*']
+  release:
+    types: [published]
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
 
 jobs:
   release:
@@ -20,15 +25,27 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - uses: gradle/actions/setup-gradle@v3
 
       - name: Build debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Create GitHub Release and upload APK
+      # Если запуск по тегу — создаем/обновляем релиз по тегу
+      - name: Create/Update Release (tag push)
+        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.ref_name }}
+          files: app/build/outputs/apk/debug/app-debug.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Если запуск от UI-публикации релиза — грузим по release_id
+      - name: Upload to current Release (UI publish)
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          release_id: ${{ github.event.release.id }}
           files: app/build/outputs/apk/debug/app-debug.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
