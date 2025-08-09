@@ -1,0 +1,29 @@
+# Gradle
+.gradle/
+build/
+
+# Local configuration
+local.properties
+
+# Log files
+*.log
+
+# Android Studio
+.idea/
+*.iml
+
+# Keystore files (если используешь подпись)
+*.jks
+*.keystore
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Misc
+captures/
+output.json
+
+# Kotlin/Java build
+bin/
+gen/
